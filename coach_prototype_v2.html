@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--surface3:#2e2e2e;
+  --text:#f0ede8;--text2:#a09c95;--text3:#6a6660;
+  --accent:#e85d3a;--accent2:#f0a060;--green:#4caf76;--amber:#e8a020;
+  --border:#2e2e2e;--border2:#3a3a3a;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%}
+.app{max-width:480px;margin:0 auto}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-name{font-family:'DM Mono',monospace;font-size:15px;font-weight:500}
+.mode-toggle{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:20px}
+.mode-btn{padding:4px 10px;border-radius:16px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;background:none;color:var(--text3)}
+.mode-btn.drill-active{background:var(--accent);color:#fff}
+.mode-btn.soft-active{background:var(--green);color:#fff}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border2)}
+.tab{padding:11px 0;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;font-weight:400}
+.tab.active{color:var(--text);border-bottom:2px solid var(--accent);font-weight:500}
+
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.coach-msg{margin:14px 16px;background:var(--surface);border-radius:var(--radius);padding:13px;display:flex;gap:11px;border:1px solid var(--border2)}
+.coach-face{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--surface2);margin-top:1px}
+.coach-text{font-size:13px;color:var(--text2);line-height:1.55}
+.coach-text strong{color:var(--text);font-weight:500}
+.coach-reply{margin-top:7px;font-size:11px;color:var(--accent);cursor:pointer;font-family:'DM Mono',monospace;display:inline-block}
+.coach-reply:hover{text-decoration:underline}
+
+.sec-label{padding:10px 16px 5px;font-size:10px;font-weight:500;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;font-family:'DM Mono',monospace}
+
+.task{display:flex;align-items:flex-start;gap:11px;padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.task:hover{background:var(--surface2)}
+.task-check{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.task-check.done{background:var(--green);border-color:var(--green);color:#fff;font-size:11px}
+.task-check.overdue{border-color:var(--accent)}
+.task-body{flex:1}
+.task-name{font-size:14px;color:var(--text);line-height:1.3}
+.task-name.done{text-decoration:line-through;color:var(--text3)}
+.task-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace}
+.task-sub.warn{color:var(--accent)}
+.task-sub.ok{color:var(--green)}
+.task-badge{font-size:10px;padding:2px 7px;border-radius:20px;flex-shrink:0;margin-top:2px;font-family:'DM Mono',monospace}
+.badge-overdue{background:rgba(232,93,58,0.15);color:var(--accent)}
+.badge-today{background:rgba(232,160,32,0.15);color:var(--amber)}
+.badge-done{background:rgba(76,175,118,0.15);color:var(--green)}
+
+.nudge{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(232,93,58,0.07);cursor:pointer;border-bottom:1px solid var(--border)}
+.nudge:hover{background:rgba(232,93,58,0.13)}
+.nudge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.nudge-text{font-size:12px;color:var(--text2);flex:1}
+.nudge-text span{color:var(--accent)}
+
+.add-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+.add-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.add-input::placeholder{color:var(--text3)}
+.add-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.add-btn:hover{opacity:0.85}
+
+/* Goals */
+.goal-card{margin:10px 16px;background:var(--surface);border-radius:var(--radius);padding:13px;border:1px solid var(--border2)}
+.goal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.goal-title{font-size:14px;font-weight:500}
+.goal-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)}
+.progress{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-bottom:7px}
+.progress-fill{height:100%;border-radius:2px;transition:width 0.6s ease}
+.fill-low{background:var(--accent)}
+.fill-mid{background:var(--amber)}
+.fill-good{background:var(--green)}
+.goal-note{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* Patterns */
+.pattern-wrap{padding:14px 16px}
+.pattern-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:18px}
+.day-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.day-lbl{font-size:9px;color:var(--text3);text-align:center;font-family:'DM Mono',monospace}
+.hm-cell{aspect-ratio:1;border-radius:3px}
+.hm-0{background:var(--surface2)}
+.hm-1{background:rgba(76,175,118,0.2)}
+.hm-2{background:rgba(76,175,118,0.45)}
+.hm-3{background:rgba(76,175,118,0.7)}
+.hm-4{background:#4caf76}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.stat-label{font-size:13px;color:var(--text2)}
+.stat-val{font-family:'DM Mono',monospace;font-size:12px}
+.stat-val.good{color:var(--green)}
+.stat-val.bad{color:var(--accent)}
+
+/* Chat */
+.chat-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:flex-end;z-index:200}
+.chat-overlay.open{display:flex}
+.chat-panel{width:100%;max-width:480px;margin:0 auto;background:var(--surface);border-radius:16px 16px 0 0;max-height:72vh;display:flex;flex-direction:column}
+.chat-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chat-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.chat-mode-tag{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;background:rgba(232,93,58,0.15);color:var(--accent)}
+.chat-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1;padding:0 2px}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:9px}
+.msg{max-width:84%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.coach{background:var(--surface2);color:var(--text2);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.msg.user{background:var(--accent);color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px}
+.msg.typing{color:var(--text3);font-style:italic}
+.chat-foot{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--border)}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.chat-input::placeholder{color:var(--text3)}
+.chat-send{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;cursor:pointer;font-size:14px;line-height:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-name">coach</span>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn drill-active" id="drillBtn" onclick="setMode('drill')">🔥 Drill</button>
+      <button class="mode-btn" id="softBtn" onclick="setMode('soft')">🌱 Nurture</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" id="tab-today" onclick="switchTab('today')">Today</div>
+    <div class="tab" id="tab-goals" onclick="switchTab('goals')">Goals</div>
+    <div class="tab" id="tab-patterns" onclick="switchTab('patterns')">Patterns</div>
+  </div>
+
+  <!-- TODAY -->
+  <div id="today-content" class="tab-content active">
+    <div class="coach-msg">
+      <div class="coach-face" id="coachFace">😤</div>
+      <div>
+        <div class="coach-text" id="coachText"><strong>You've missed your morning run 3 days in a row.</strong> You said fitness was your top priority this month. What's actually going on?</div>
+        <span class="coach-reply" onclick="openChat('run')">↗ Reply to Coach</span>
+      </div>
+    </div>
+    <div class="sec-label">Tasks · Today</div>
+    <div id="taskList"></div>
+    <div class="nudge" onclick="openChat('avoid')">
+      <div class="nudge-dot"></div>
+      <div class="nudge-text">Coach says: <span id="nudgeText">you've been dodging the project proposal for 2 days</span></div>
+      <span style="color:var(--text3);font-size:14px">›</span>
+    </div>
+    <div class="add-row">
+      <input class="add-input" id="taskInput" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()">
+      <button class="add-btn" onclick="addTask()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div id="goals-content" class="tab-content">
+    <div id="goalsList"></div>
+    <div class="add-row">
+      <input class="add-input" id="goalInput" placeholder="Add a goal…" onkeydown="if(event.key==='Enter')addGoal()">
+      <button class="add-btn" onclick="addGoal()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div id="patterns-content" class="tab-content">
+    <div class="pattern-wrap">
+      <div class="pattern-title">Completion heatmap — last 4 weeks</div>
+      <div class="day-labels">
+        <div class="day-lbl">M</div><div class="day-lbl">T</div><div class="day-lbl">W</div>
+        <div class="day-lbl">T</div><div class="day-lbl">F</div><div class="day-lbl">S</div><div class="day-lbl">S</div>
+      </div>
+      <div class="heatmap" id="heatmap"></div>
+      <div class="stat-row"><span class="stat-label">Best day</span><span class="stat-val good">Tuesday</span></div>
+      <div class="stat-row"><span class="stat-label">Weakest day</span><span class="stat-val bad">Friday</span></div>
+      <div class="stat-row"><span class="stat-label">Current streak</span><span class="stat-val good">3 days 🔥</span></div>
+      <div class="stat-row"><span class="stat-label">Most avoided goal</span><span class="stat-val bad">Morning run</span></div>
+      <div class="stat-row"><span class="stat-label">Tasks done this week</span><span class="stat-val">7 / 12</span></div>
+      <div class="stat-row"><span class="stat-label">Overall completion rate</span><span class="stat-val">64%</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chat panel -->
+<div class="chat-overlay" id="chatOverlay" onclick="closeChatOutside(event)">
+  <div class="chat-panel">
+    <div class="chat-hdr">
+      <span class="chat-title">
+        Coach
+        <span class="chat-mode-tag" id="chatModeTag">drill sergeant</span>
+      </span>
+      <button class="chat-close" onclick="closeChat()">×</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-foot">
+      <input class="chat-input" id="chatInput" placeholder="Reply to Coach…" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let mode = 'drill';
+let chatHistory = [];
+let chatContext = '';
+
+let tasks = [
+  {id:1,name:'Morning run — 5km',done:false,overdue:true,missed:3},
+  {id:2,name:'Draft Q3 project proposal',done:false,overdue:true,missed:0},
+  {id:3,name:'Call Mum back',done:false,overdue:false,missed:0},
+  {id:4,name:'Read 20 pages',done:false,overdue:false,missed:0},
+  {id:5,name:'Weekly grocery shop',done:true,overdue:false,missed:0},
+];
+
+let goals = [
+  {id:1,name:'Run 3x per week 🏃',progress:33,color:'low',note:'1 of 3 runs done this week. Coach is watching.'},
+  {id:2,name:'Read 12 books this year 📚',progress:58,color:'mid',note:'7 of 12 — on track but slowing down.'},
+  {id:3,name:'Launch side project 💼',progress:80,color:'good',note:'Great progress. Final tasks outstanding.'},
+];
+
+const heatData = [0,1,2,3,2,1,0,1,3,4,2,1,0,1,2,2,3,4,3,1,0,1,2,3,2,1,2,1];
+
+const msgs = {
+  drill:{
+    face:'😤',
+    main:'<strong>You\'ve missed your morning run 3 days in a row.</strong> You said fitness was your top priority this month. What\'s actually going on?',
+    nudge:"you've been dodging the project proposal for 2 days"
+  },
+  soft:{
+    face:'🌱',
+    main:'<strong>Hey — your morning run hasn\'t happened this week.</strong> That\'s okay. Let\'s figure out what\'s getting in the way and make it easier.',
+    nudge:"the project proposal might be feeling a bit overwhelming"
+  }
+};
+
+function renderTasks(){
+  document.getElementById('taskList').innerHTML = tasks.map(t=>`
+    <div class="task" onclick="toggleTask(${t.id})">
+      <div class="task-check ${t.done?'done':t.overdue?'overdue':''}">${t.done?'✓':''}</div>
+      <div class="task-body">
+        <div class="task-name ${t.done?'done':''}">${t.name}</div>
+        <div class="task-sub ${t.overdue&&!t.done?'warn':t.done?'ok':''}">
+          ${t.done?'✓ completed':t.overdue?(t.missed>0?`⚠ missed ${t.missed}x this week`:'⚠ overdue'):'due today'}
+        </div>
+      </div>
+      <span class="task-badge ${t.done?'badge-done':t.overdue?'badge-overdue':'badge-today'}">${t.done?'done':t.overdue?'overdue':'today'}</span>
+    </div>`).join('');
+}
+
+function renderGoals(){
+  document.getElementById('goalsList').innerHTML = goals.map(g=>`
+    <div class="goal-card">
+      <div class="goal-hdr">
+        <span class="goal-title">${g.name}</span>
+        <span class="goal-pct">${g.progress}%</span>
+      </div>
+      <div class="progress"><div class="progress-fill fill-${g.color}" style="width:${g.progress}%"></div></div>
+      <div class="goal-note">${g.note}</div>
+    </div>`).join('');
+}
+
+function renderHeatmap(){
+  document.getElementById('heatmap').innerHTML = heatData.map(v=>`<div class="hm-cell hm-${v}"></div>`).join('');
+}
+
+function toggleTask(id){
+  const t=tasks.find(t=>t.id===id);
+  if(t){t.done=!t.done;renderTasks();}
+}
+
+function addTask(){
+  const el=document.getElementById('taskInput');
+  const v=el.value.trim();
+  if(!v)return;
+  tasks.unshift({id:Date.now(),name:v,done:false,overdue:false,missed:0});
+  el.value='';
+  renderTasks();
+}
+
+function addGoal(){
+  const el=document.getElementById('goalInput');
+  const v=el.value.trim();
+  if(!v)return;
+  goals.push({id:Date.now(),name:v,progress:0,color:'low',note:'Just getting started — Coach will be watching! 👀'});
+  el.value='';
+  renderGoals();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('drillBtn').className='mode-btn'+(m==='drill'?' drill-active':'');
+  document.getElementById('softBtn').className='mode-btn'+(m==='soft'?' soft-active':'');
+  const c=msgs[mode];
+  document.getElementById('coachFace').textContent=c.face;
+  document.getElementById('coachText').innerHTML=c.main;
+  document.getElementById('nudgeText').textContent=c.nudge;
+  document.getElementById('chatModeTag').textContent=m==='drill'?'drill sergeant':'nurture coach';
+  document.getElementById('chatModeTag').style.background=m==='drill'?'rgba(232,93,58,0.15)':'rgba(76,175,118,0.15)';
+  document.getElementById('chatModeTag').style.color=m==='drill'?'var(--accent)':'var(--green)';
+}
+
+function switchTab(tab){
+  ['today','goals','patterns'].forEach(t=>{
+    document.getElementById('tab-'+t).className='tab'+(t===tab?' active':'');
+    document.getElementById(t+'-content').className='tab-content'+(t===tab?' active':'');
+  });
+}
+
+function openChat(ctx){
+  chatContext=ctx;
+  chatHistory=[];
+  document.getElementById('chatOverlay').classList.add('open');
+  const openers={
+    run:{
+      drill:"Three missed runs. You told me fitness was your number one priority — so what's the excuse this time?",
+      soft:"Hey — I noticed your morning run hasn't happened this week. No judgement at all, but I'd love to understand what's been getting in the way. What's going on?"
+    },
+    avoid:{
+      drill:"You've been staring at that project proposal for two days. Every day you don't start, you feel worse about it. What's actually stopping you?",
+      soft:"The project proposal seems to be sitting there untouched — that often means something feels overwhelming about it. What part feels hardest to start?"
+    }
+  };
+  const opener = openers[ctx][mode];
+  document.getElementById('chatMsgs').innerHTML=`<div class="msg coach">${opener}</div>`;
+  chatHistory.push({role:'assistant',content:opener});
+  document.getElementById('chatInput').focus();
+}
+
+function closeChat(){
+  document.getElementById('chatOverlay').classList.remove('open');
+}
+
+function closeChatOutside(e){
+  if(e.target.id==='chatOverlay')closeChat();
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const v=inp.value.trim();
+  if(!v)return;
+  inp.value='';
+  const msgsEl=document.getElementById('chatMsgs');
+  msgsEl.innerHTML+=`<div class="msg user">${v}</div><div class="msg coach typing" id="typing">Coach is thinking…</div>`;
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+  chatHistory.push({role:'user',content:v});
+  try{
+    const sys = mode==='drill'
+      ? 'You are Coach, a tough but fair accountability coach. You are direct, no-nonsense, and push people hard. You call out avoidance without being cruel. 2-3 sentences max.'
+      : 'You are Coach, a warm supportive accountability coach. You ask thoughtful questions and help people problem-solve. Encouraging and kind. 2-3 sentences max.';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:chatHistory})
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'Keep going.';
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById('typing').remove();
+    msgsEl.innerHTML+=`<div class="msg coach">${reply}</div>`;
+    msgsEl.scrollTop=msgsEl.scrollHeight;
+  }catch(e){
+    document.getElementById('typing').textContent='Connection issue — try again.';
+  }
+}
+
+renderTasks();
+renderGoals();
+renderHeatmap();
+</script>
+</body>
+</html>
